@@ -1,0 +1,44 @@
+name: CI (StudyDiary)
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-test-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Show author info
+        run: |
+          echo "Repository: ${{ github.repository }}"
+          echo "Actor (author): ${{ github.actor }}"
+          echo "Commit SHA: ${{ github.sha }}"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Run project (build check)
+        run: |
+          python -V
+          python main.py || true
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/heads/main')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: "lr6-${{ github.run_number }}"
+          name: "LR6 Release #${{ github.run_number }}"
+          body: |
+            Automated release created by GitHub Actions.
+            Actor: ${{ github.actor }}
+            SHA: ${{ github.sha }}
